@@ -1,179 +1,177 @@
-🛒 QKart Enterprise Automation Framework
+# QKart Enterprise Test Automation Framework
 
-📖 Executive Summary
+Enterprise-grade, data-driven, self-healing UI automation framework designed for the QKart e‑commerce platform. This framework follows a layered architecture, supports stable parallel execution, provides rich reporting, and ensures long-term maintainability.
 
-This is an Enterprise-Grade, Data-Driven Automation Framework engineered for the QKart E-commerce platform. It transforms fragile linear scripts into a Self-Healing, Parallel-Ready, and Observable testing solution.
+---
 
-Designed using SOLID principles and industry-standard Design Patterns, this framework solves common automation challenges like flaky tests, stale elements, and race conditions during parallel execution.
+## 1. Problem Statement
 
-🏗 High-Level Architecture
+UI test automation often faces challenges such as:
 
-The framework is built on a modular, layered architecture to ensure separation of concerns.
+* Flaky tests caused by DOM re-renders
+* Browser conflicts during parallel execution
+* Hard-coded test data
+* Weak reporting without screenshots
+* Slow execution time
 
-graph TD
-subgraph "Data Layer"
-Excel[(Dataset.xlsx)]
-Config[config.properties]
-Constants[StringConstants]
-end
+**This framework solves these issues through:**
 
-    subgraph "Core Engine"
-        Factory[DriverFactory]
-        TL[ThreadLocal Manager]
-        Listener[TestListener]
-        Transformer[AnnotationTransformer]
-        Report[ExtentReports 5]
-    end
+* Thread-safe WebDriver using `ThreadLocal`
+* Self-healing retry logic for stale elements
+* Excel-driven test data
+* ExtentReports HTML reports with embedded screenshots
+* Configurable environment & browser setup
 
-    subgraph "Business Logic"
-        Tests[Test Classes]
-        POM[Page Object Model]
-        Locators[Locator Repository]
-        Waits[Smart Wait Strategy]
-    end
+---
 
-    Excel -->|Feeds Data| Tests
-    Tests -->|Invokes| POM
-    POM -->|Read| Locators
-    Tests -->|Init| Factory
-    Factory -->|Wrap Driver| TL
-    Listener -->|Watch| Tests
-    Transformer -->|Inject| RetryAnalyzer
-    Listener -->|Generate| Report
+## 2. High-Level Architecture
 
+### Layered Architecture
 
-⚡ Deep Dive: Technical Highlights
+```
+Data Layer
+├── Dataset.xlsx
+├── config.properties
+└── StringConstants
 
-1. Parallel Execution & Thread Safety
+Core Engine
+├── DriverFactory
+├── ThreadLocal Driver Manager
+├── TestNG Listeners
+├── Retry Analyzer (Auto-injected)
+└── ExtentReports 5 HTML Reporter
 
-The Challenge: In standard frameworks, a static WebDriver instance causes session conflicts when running tests in parallel (e.g., Thread A closes Thread B's browser).
+Business Logic Layer
+├── Test Classes
+├── Page Objects
+├── Locator Repository
+└── Smart Wait Handler
+```
 
-The Solution:
+### Architecture Summary
 
-We utilize ThreadLocal<WebDriver> within BaseTest.
+* **Data Layer:** Central storage for config and test data
+* **Core Engine:** Browser management, reporting, retry, listeners
+* **Business Logic:** Page Objects and Tests (clean, readable, scalable)
 
-This creates a thread-isolated container for each driver instance.
+---
 
-Result: You can run thread-count="4" in testng.xml, reducing regression time by 75% with zero cross-thread contamination.
+## 3. Technical Highlights
 
-2. Self-Healing Mechanics (Resilience)
+### 3.1 Thread-Safe Parallel Execution
 
-The Challenge: Modern React/Angular apps frequently re-render the DOM, causing StaleElementReferenceException.
+Each test thread receives its own WebDriver instance via `ThreadLocal`, preventing cross-thread interference.
 
-The Solution:
+**Benefits:**
 
-The BasePage wrapper methods (click, sendKeys) implement a Smart Retry Loop.
+* True parallel execution
+* No shared-driver issues
+* No accidental session closures
 
-If a stale element is detected, the framework automatically re-fetches the locator and retries the action up to 3 times before failing.
+---
 
-Result: Flakiness is drastically reduced without hard Thread.sleep waits.
+### 3.2 Self-Healing Stale Element Handling
 
-3. Context-Aware Reporting
+Modern apps re-render DOM frequently. To avoid flaky failures, the framework wraps Selenium actions with:
 
-Extent Reports 5: Generates an interactive HTML dashboard.
+* Retry mechanism
+* Element re-location
+* Smart waiting strategy
 
-Base64 Snapshots: Screenshots are captured only on failure and converted to Base64 strings. They are embedded directly into the HTML file.
+This significantly reduces flaky test results.
 
-Why Base64? It makes the report portable (single file). You can email it to stakeholders, and the images will never appear broken.
+---
 
-4. Dynamic Data Driving
+### 3.3 Data-Driven Test Execution
 
-Apache POI Integration: Tests are decoupled from data.
+Using Apache POI, the framework reads test scenarios from `Dataset.xlsx`.
 
-Excel Provider: The ExcelUtils class dynamically reads test scenarios from Dataset.xlsx. Adding a new test scenario is as simple as adding a row to the Excel sheet—no code changes required.
+**Advantages:**
 
-🔄 Execution Sequence Diagram
+* Add scenarios without code changes
+* Easy maintenance
+* Flexible test variations
 
-The following diagram illustrates the lifecycle of a single test case execution flow, demonstrating how the ThreadLocal driver and Smart Waits interact.
+---
 
-sequenceDiagram
-participant TestNG as TestNG Engine
-participant Data as Excel Provider
-participant Base as BaseTest (ThreadLocal)
-participant Page as Page Object
-participant Driver as WebDriver
-participant Report as Extent Report
+### 3.4 Rich Reporting
 
-    TestNG->>Data: Fetch Test Data (Row 1)
-    Data-->>TestNG: Return {Username, Password}
-    
-    TestNG->>Base: @BeforeMethod (setUp)
-    Base->>Driver: Initialize ChromeDriver
-    Driver-->>Base: Session ID: 12345 (Stored in ThreadLocal)
-    
-    TestNG->>Page: Run Test(Username, Password)
-    Page->>Driver: FindElement (Smart Wait)
-    Driver-->>Page: WebElement Found
-    Page->>Driver: Click()
-    
-    alt StaleElementReferenceException
-        Page->>Page: Catch & Retry (Self-Healing)
-        Page->>Driver: Click() again
-    end
-    
-    Driver-->>Page: Action Success
-    
-    alt Test Failed?
-        TestNG->>Driver: Capture Screenshot (Base64)
-        TestNG->>Report: Log Failure + Embed Image
-    else Test Passed
-        TestNG->>Report: Log PASS
-    end
-    
-    TestNG->>Base: @AfterMethod (tearDown)
-    Base->>Driver: Quit Session 12345
+ExtentReports generates a single HTML file containing:
 
+* Screenshots (Base64 embedded)
+* Execution logs
+* Test status summary
 
-📂 Project Structure
+This makes reports portable and easy to share.
 
+---
+
+## 4. End-to-End Execution Flow
+
+```
+TestNG → Read Excel Data
+      → BeforeMethod → Driver Setup (ThreadLocal)
+      → Execute Test → Page Object Methods
+      → Smart Wait / Retry on failures
+      → Capture screenshot on failure
+      → Log results to Extent Report
+      → AfterMethod → Quit WebDriver
+```
+
+---
+
+## 5. Project Structure
+
+```
 src/test/java/com/qkart
-├── constants       # Single Source of Truth (Paths, URLs, Locators)
-├── driver          # WebDriver Factory & Browser Options Manager
-├── enums           # Type-safe WaitStrategies (CLICKABLE, VISIBLE)
-├── listeners       # TestNG Listeners (Reporting, Retry Logic injection)
-├── pages           # Page Object Classes (Business Logic only)
-├── reports         # Generated Timestamped HTML Reports
-├── tests           # Test Classes (Assertions & Flows)
-└── utils           # Utilities (Excel, Config, Dynamic Xpath)
+├── constants
+├── driver
+├── enums
+├── listeners
+├── pages
+├── reports
+├── tests
+└── utils
 
 src/test/resources
-├── config.properties  # Global Environment Config
-├── log4j2.xml         # Logging Config
-└── Dataset.xlsx       # Test Data
+├── config.properties
+├── log4j2.xml
+└── Dataset.xlsx
+```
 
+---
 
-⚡ How to Run Tests
+## 6. Execution Commands
 
-The framework supports two execution modes via Maven.
+### Parallel Execution
 
-1. High-Speed Parallel Execution
-
-Best for nightly regression suites.
-
+```
 mvn clean test -DsuiteXmlFile=testng_parallel.xml
+```
 
+### Sequential Execution
 
-2. Sequential Execution (Debug Mode)
-
-Best for debugging specific flows or recording execution videos.
-
+```
 mvn clean test -DsuiteXmlFile=testng_sequential.xml
+```
 
+### From IntelliJ
 
-3. IDE Execution
+Right‑click the desired TestNG XML → **Run**.
 
-Right-click on either testng_parallel.xml or testng_sequential.xml in IntelliJ and select Run.
+---
 
-🔧 Configuration
+## 7. Configuration
 
-Modify src/test/resources/config.properties to control the environment:
+```
+url=https://crio-qkart-frontend-qa.vercel.app
+browser=chrome
+headless=false
+implicitWait=15
+```
 
-url=[https://crio-qkart-frontend-qa.vercel.app](https://crio-qkart-frontend-qa.vercel.app)
-browser=chrome         # Options: chrome, firefox, edge
-headless=false         # Options: true (for CI), false (for UI)
-implicitWait=15        # Global timeout in seconds
+---
 
+## 8. Author
 
-👨‍💻 Author
-
-Natarajan M
+**Natarajan M** – SDET
