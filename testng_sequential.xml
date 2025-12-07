@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="QKart Sequential Suite">
+
+    <listeners>
+        <listener class-name="com.qkart.listeners.TestListener"/>
+        <listener class-name="com.qkart.listeners.AnnotationTransformer"/>
+    </listeners>
+
+    <test name="Sanity Tests - Sequential">
+        <classes>
+            <class name="com.qkart.tests.QkartSanityTests"/>
+        </classes>
+    </test>
+</suite>
