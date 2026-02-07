@@ -1,0 +1,32 @@
+﻿git : Vim: Warning: Output is not to a terminal
+At line:1 char:141
++ ... qkart/reports/ExtentManager.java ; git rebase --continue 2>&1 | Out-F ...
++                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Vim: Warning: O...t to a terminal:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[?1049h[22;0;0t[>4;2m[?1h=[?2004h[?1004h[1;25r[?12h[?12l[22;2t[22;1t[27m[23m[29m[m[H[2J[?25l[25;1H"/d/INTELIJ/Q-KART/.git/COMMIT_EDITMSG" [unix] 20L, 1371B[1;1H[38;5;130mAdd ExtentManager and .gitignore - Added missing E[mxtentManager.java for report generation - Added .gitignore to exclude target, logs, IDE files
+
+[34m# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# interactive rebase in progress; onto 987237d
+# [m[35mLast commands done (2 commands done):[m[25;1H
+[97m[41mE363: Pattern uses more memory than 'maxmempattern'[m
+
+[32mPress ENTER or type command to continue[?25h[m
+
+[?25l'redrawtime' exceeded, syntax highlighting disabled
+
+[32mPress ENTER or type command to continue[?25h[m[8;1H#    pick 6505811 Refactor: Scalable framework with clean architecture - Added ConfigManager for centralized configuration - Added BrowserType enum for type-safe browser selection - Added custom exceptions (FrameworkException, ElementNotFoundException, etc.) - Added WaitUtils and ScreenshotUtils utilities --[9;1H Implemented fluent pattern in all Page Objects - Fixed thread-safety in RetryAnalyzer - Removed redundant files (ConfigLoader, environment configs) - Simplified FrameworkConstants - Updated README with visual diagrams and flowcharts - Added comprehensive logging with Log4j2
+#    pick 0229d14 Add ExtentManager and .gitignore - Added missing ExtentManager.java for report generation - Added .gitignore to exclude target, logs, IDE files
+# No commands remaining.
+# You are currently rebasing branch 'main' on '987237d'.
+#
+# Changes to be committed:
+#[7Cmodified:   .gitignore
+#[7Cnew file:   src/test/java/com/qkart/reports/ExtentManager.java
+#
+# Untracked files:
+#[7Cgit_output.txt
+#[7Cgit_push.txt
